@@ -1,0 +1,22 @@
+# .github/workflows/deploy.yml
+name: CD — Deploy to production workspace
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy notebooks to ws-banking-prod
+        env:
+          FABRIC_CLIENT_ID:     ${{ secrets.FABRIC_CLIENT_ID }}
+          FABRIC_CLIENT_SECRET: ${{ secrets.FABRIC_CLIENT_SECRET }}
+          FABRIC_WORKSPACE_ID:  ${{ secrets.FABRIC_PROD_WORKSPACE_ID }}
+        run: |
+          pip install requests msal
+          python scripts/deploy_notebooks.py
+      - name: Trigger production pipeline run
+        run: python scripts/trigger_pipeline.py --env prod
