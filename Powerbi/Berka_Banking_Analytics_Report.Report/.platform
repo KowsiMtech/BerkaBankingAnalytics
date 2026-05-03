@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Berka_Banking_Analytics_Report"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "51cba29d-5082-9728-4313-16c9af929863"
+  }
+}

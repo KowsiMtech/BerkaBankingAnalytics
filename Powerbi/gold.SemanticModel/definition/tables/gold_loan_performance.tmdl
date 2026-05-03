@@ -1,0 +1,144 @@
+table gold_loan_performance
+	lineageTag: 1e3e81d0-adff-4f8c-a3c1-2734aa9b1654
+	sourceLineageTag: [dbo].[gold_loan_performance]
+
+	column loan_id
+		dataType: int64
+		formatString: 0
+		lineageTag: b6115cd1-8c07-44c7-9c86-ca9b0e5a2c36
+		sourceLineageTag: loan_id
+		summarizeBy: sum
+		sourceColumn: loan_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column account_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 39bae827-ba14-4bac-b2ee-dd96f63cfc5e
+		sourceLineageTag: account_id
+		summarizeBy: sum
+		sourceColumn: account_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column loan_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: bcbaee18-e0df-46cd-a5ab-179c26cd181e
+		sourceLineageTag: loan_date
+		summarizeBy: none
+		sourceColumn: loan_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column amount
+		dataType: decimal
+		formatString: \$#,0.###############;-\$#,0.###############;\$#,0.###############
+		lineageTag: 9fa699af-b9cb-49d8-9079-64cb96731b02
+		sourceLineageTag: amount
+		summarizeBy: sum
+		sourceColumn: amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-CA"}
+
+	column duration
+		dataType: string
+		lineageTag: 51246bbf-8c91-452f-9db2-77431701a597
+		sourceLineageTag: duration
+		summarizeBy: none
+		sourceColumn: duration
+
+		annotation SummarizationSetBy = Automatic
+
+	column payments
+		dataType: decimal
+		formatString: \$#,0.###############;-\$#,0.###############;\$#,0.###############
+		lineageTag: 061fe68e-2c94-4c10-a9dd-38204efb8b31
+		sourceLineageTag: payments
+		summarizeBy: sum
+		sourceColumn: payments
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-CA"}
+
+	column status
+		dataType: string
+		lineageTag: 667268a0-b3c0-4e43-b32f-8b757037b9a2
+		sourceLineageTag: status
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column status_label
+		dataType: string
+		lineageTag: c87f6ac3-7fae-4f33-8119-e2411ceac6b6
+		sourceLineageTag: status_label
+		summarizeBy: none
+		sourceColumn: status_label
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_default
+		dataType: int64
+		formatString: 0
+		lineageTag: 086c738b-8851-4850-a113-a340fba84246
+		sourceLineageTag: is_default
+		summarizeBy: sum
+		sourceColumn: is_default
+
+		annotation SummarizationSetBy = Automatic
+
+	column region
+		dataType: string
+		lineageTag: 91fd909b-6eb9-4114-ab32-40d79e4af13a
+		sourceLineageTag: region
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_salary
+		dataType: double
+		lineageTag: f5be6a1d-87d2-4533-8cfc-308dc27199f7
+		sourceLineageTag: avg_salary
+		summarizeBy: sum
+		sourceColumn: avg_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column unemployment_rate
+		dataType: double
+		lineageTag: df4ffabc-0d33-4a80-944b-9c5f25a39c66
+		sourceLineageTag: unemployment_rate
+		summarizeBy: sum
+		sourceColumn: unemployment_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column loan_to_income_ratio
+		dataType: double
+		lineageTag: a161e95f-9c41-4a01-8dc8-7590cd29a1d0
+		sourceLineageTag: loan_to_income_ratio
+		summarizeBy: sum
+		sourceColumn: loan_to_income_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition gold_loan_performance = entity
+		mode: directLake
+		source
+			entityName: gold_loan_performance
+			schemaName: dbo
+			expressionSource: 'DirectLake - banking_lakehouse'
+

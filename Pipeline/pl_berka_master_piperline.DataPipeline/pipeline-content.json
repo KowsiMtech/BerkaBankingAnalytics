@@ -1,0 +1,394 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "34896f04-002e-8ac2-476f-a0f0cc13a378",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "ENVIRONMENT": {
+              "value": {
+                "value": "@pipeline().parameters.ENVIRONMENT",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Run_Silver_Transform",
+        "dependsOn": [
+          {
+            "activity": "Wait after bronze",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "0223f868-4247-be9a-4a68-dcac311c7922",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "ENVIRONMENT": {
+              "value": {
+                "value": "@pipeline().parameters.ENVIRONMENT",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Run_silver_scd",
+        "dependsOn": [
+          {
+            "activity": "Wait after silver transformation",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "7e4d861c-96d6-9a44-4c59-d78c0c7cff9d",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "ENVIRONMENT": {
+              "value": {
+                "value": "@pipeline().parameters.ENVIRONMENT",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Optimize",
+        "dependsOn": [
+          {
+            "activity": "Wait after gold",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "b69e86f7-dcd6-9f3f-44c6-8ed5023c0e65",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "ENVIRONMENT": {
+              "value": {
+                "value": "@pipeline().parameters.ENVIRONMENT",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Run_Gold_Aggregation",
+        "dependsOn": [
+          {
+            "activity": "Wait after validation",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Wait",
+        "typeProperties": {
+          "waitTimeInSeconds": 60
+        },
+        "name": "Wait after silver transformation",
+        "dependsOn": [
+          {
+            "activity": "Run_Silver_Transform",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Wait",
+        "typeProperties": {
+          "waitTimeInSeconds": 60
+        },
+        "name": "Wait after silver scd",
+        "dependsOn": [
+          {
+            "activity": "Run_silver_scd",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "a84bed0d-a6b5-9d6f-4a3f-2eb4b284bf4a",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "ENVIRONMENT": {
+              "value": {
+                "value": "@pipeline().parameters.ENVIRONMENT",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "dq_validation",
+        "dependsOn": [
+          {
+            "activity": "Wait after silver scd",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Wait",
+        "typeProperties": {
+          "waitTimeInSeconds": 60
+        },
+        "name": "Wait after gold",
+        "dependsOn": [
+          {
+            "activity": "Run_Gold_Aggregation",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "ForEach",
+        "typeProperties": {
+          "isSequential": true,
+          "items": {
+            "value": "@createArray('trans','account','client','loan','card','disp','order','district')",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "type": "Copy",
+              "typeProperties": {
+                "source": {
+                  "type": "DelimitedTextSource",
+                  "formatSettings": {
+                    "type": "DelimitedTextReadSettings"
+                  },
+                  "storeSettings": {
+                    "type": "LakehouseReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                  },
+                  "datasetSettings": {
+                    "type": "DelimitedText",
+                    "typeProperties": {
+                      "location": {
+                        "type": "LakehouseLocation",
+                        "folderPath": "bronze",
+                        "fileName": {
+                          "value": "@{concat(item(), '.csv')}",
+                          "type": "Expression"
+                        }
+                      },
+                      "columnDelimiter": ";",
+                      "quoteChar": "\"",
+                      "escapeChar": "\\",
+                      "firstRowAsHeader": true
+                    },
+                    "schema": [],
+                    "connectionSettings": {
+                      "name": "banking_lakehouse",
+                      "properties": {
+                        "type": "Lakehouse",
+                        "typeProperties": {
+                          "artifactId": "730f435f-8cba-a717-4894-01db8553a2a1",
+                          "workspaceId": "00000000-0000-0000-0000-000000000000",
+                          "rootFolder": "Files"
+                        },
+                        "externalReferences": {
+                          "connection": "a58f3f75-e522-4d13-bfc5-a0a6f2e44623"
+                        },
+                        "annotations": []
+                      }
+                    },
+                    "annotations": []
+                  }
+                },
+                "sink": {
+                  "type": "LakehouseTableSink",
+                  "tableActionOption": "OverwriteSchema",
+                  "applyVOrder": false,
+                  "partitionOption": "None",
+                  "datasetSettings": {
+                    "type": "LakehouseTable",
+                    "typeProperties": {
+                      "schema": "",
+                      "table": {
+                        "value": "@@concat('bronze_', item())",
+                        "type": "Expression"
+                      }
+                    },
+                    "schema": [],
+                    "connectionSettings": {
+                      "name": "banking_lakehouse",
+                      "properties": {
+                        "type": "Lakehouse",
+                        "typeProperties": {
+                          "artifactId": "730f435f-8cba-a717-4894-01db8553a2a1",
+                          "workspaceId": "00000000-0000-0000-0000-000000000000",
+                          "rootFolder": "Tables"
+                        },
+                        "externalReferences": {
+                          "connection": "a58f3f75-e522-4d13-bfc5-a0a6f2e44623"
+                        },
+                        "annotations": []
+                      }
+                    },
+                    "annotations": []
+                  }
+                },
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                },
+                "enableStaging": false
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Copy_ToLakehouse",
+              "dependsOn": []
+            }
+          ]
+        },
+        "name": "ForEach_BerkaTables",
+        "dependsOn": []
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "0af7603f-7960-85b6-40b8-d6caa99f1b35",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "ENVIRONMENT": {
+              "value": {
+                "value": "@pipeline().parameters.ENVIRONMENT",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Bronze_Ingestion",
+        "dependsOn": [
+          {
+            "activity": "ForEach_BerkaTables",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Wait",
+        "typeProperties": {
+          "waitTimeInSeconds": 60
+        },
+        "name": "Wait after bronze",
+        "dependsOn": [
+          {
+            "activity": "Bronze_Ingestion",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Wait",
+        "typeProperties": {
+          "waitTimeInSeconds": 60
+        },
+        "name": "Wait after validation",
+        "dependsOn": [
+          {
+            "activity": "dq_validation",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "ENVIRONMENT": {
+        "type": "string",
+        "defaultValue": "dev"
+      }
+    }
+  }
+}

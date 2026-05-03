@@ -1,0 +1,14 @@
+[
+  {
+    "name": "bronze",
+    "path": "/Files",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "cdba426c-abb6-471f-974b-659b256547dc",
+        "location": "https://bankingstoragectl.dfs.core.windows.net",
+        "subpath": "/bronze"
+      }
+    }
+  }
+]

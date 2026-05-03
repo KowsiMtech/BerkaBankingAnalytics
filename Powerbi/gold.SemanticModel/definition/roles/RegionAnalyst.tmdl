@@ -1,0 +1,7 @@
+role RegionAnalyst
+	modelPermission: read
+
+	tablePermission gold_loan_performance = [region] == "USERPRINCIPALNAME()"
+
+	annotation PBI_Id = c1a1d6f51d77464cbf664f550408bc34
+

@@ -1,0 +1,180 @@
+table gold_customer_360
+	lineageTag: 11e38372-97fa-4004-b680-4b1a6ab40fd9
+	sourceLineageTag: [dbo].[gold_customer_360]
+
+	measure 'Loan Default Rate %' = ```
+			
+			DIVIDE(CALCULATE(COUNTROWS(gold_loan_performance), gold_loan_performance[is_default] = 1), COUNTROWS(gold_loan_performance), 0) * 100
+			
+			```
+		lineageTag: 5ea56fd5-5648-464f-b7ac-3bf949fe6dc6
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Net Transaction Flow' = ```
+			
+			SUM(gold_monthly_summary[total_credit]) - SUM(gold_monthly_summary[total_debit])
+			
+			```
+		lineageTag: e64f9c6e-bf45-485e-b84f-649b2eb6cd72
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Active Accounts (30 Days)' = ```
+			
+			VAR MaxDate = MAX(gold_monthly_summary[last_txn_date]) RETURN CALCULATE(DISTINCTCOUNT(gold_monthly_summary[account_id]), gold_monthly_summary[last_txn_date] >= MaxDate - 30)
+			
+			```
+		formatString: 0
+		lineageTag: d006dc31-2d5f-44cc-9fb2-5df3e79c1ed0
+
+		changedProperty = Name
+
+	measure 'Overdraft Risk Count' = ```
+			
+			CALCULATE(COUNTROWS(gold_monthly_summary), gold_monthly_summary[credit_debit_ratio] < 0.5)
+			
+			```
+		formatString: 0
+		lineageTag: 29a1bf6e-b814-4664-9539-794d7b782c0e
+
+		changedProperty = Name
+
+	measure 'Monthly Transactions' =
+			
+			COUNTROWS(gold_monthly_summary)
+		formatString: 0
+		lineageTag: ddb487d7-54fe-4e93-ae77-7dd2b7e47139
+
+		changedProperty = Name
+
+	measure 'Avg Loan Amount' =
+			
+			AVERAGE(gold_loan_performance[amount])
+		formatString: \$#,0.###############;-\$#,0.###############;\$#,0.###############
+		lineageTag: 4a0fc645-4219-4be8-839f-5a7eeba320a2
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-CA"}
+
+	measure 'Total Customers' =
+			
+			COUNTROWS(gold_customer_360)
+		formatString: 0
+		lineageTag: 6cde55fd-9029-42cd-8db0-335d64850fc9
+
+		changedProperty = Name
+
+	measure 'High Value Customers' = ```
+			
+			CALCULATE(
+			    COUNTROWS(gold_customer_360),
+			    gold_customer_360[lifetime_volume] >= 
+			    PERCENTILEX.INC(ALL(gold_customer_360), gold_customer_360[lifetime_volume], 0.8)
+			)
+			```
+		formatString: 0
+		lineageTag: d61e35ef-2f26-4e8a-ae5a-9f4d5e14528e
+
+		changedProperty = Name
+
+	measure 'Is Dormant' = ```
+			
+			IF(MAX(gold_monthly_summary[last_txn_date]) < TODAY() - 365, "Dormant", "Active")
+			
+			```
+		lineageTag: 02548ec2-3743-4a42-9b26-163ee4d8b61a
+
+		changedProperty = Name
+
+	measure 'Net Flow' = ```
+			
+			    SUM(gold_monthly_summary[total_credit])
+			  - SUM(gold_monthly_summary[total_debit])
+			
+			```
+		lineageTag: 7da6c016-0c01-45ad-83a2-e5029d511825
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column client_id
+		dataType: string
+		lineageTag: bbfc7dc1-7ccd-472e-97aa-2efff54edd56
+		sourceLineageTag: client_id
+		summarizeBy: none
+		sourceColumn: client_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column gender
+		dataType: string
+		lineageTag: 16f4aa64-5f29-442d-a367-23ae29463d5a
+		sourceLineageTag: gender
+		summarizeBy: none
+		sourceColumn: gender
+
+		annotation SummarizationSetBy = Automatic
+
+	column age_band
+		dataType: string
+		lineageTag: debfc388-5a81-47fb-9a13-d7ec046fccf4
+		sourceLineageTag: age_band
+		summarizeBy: none
+		sourceColumn: age_band
+
+		annotation SummarizationSetBy = Automatic
+
+	column birth_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 307944ac-f6e9-48ce-9c27-70f41960f70d
+		sourceLineageTag: birth_date
+		summarizeBy: none
+		sourceColumn: birth_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column lifetime_txns
+		dataType: int64
+		formatString: 0
+		lineageTag: 93a21159-1771-49b5-9b99-1191126380b8
+		sourceLineageTag: lifetime_txns
+		summarizeBy: sum
+		sourceColumn: lifetime_txns
+
+		annotation SummarizationSetBy = Automatic
+
+	column lifetime_volume
+		dataType: double
+		lineageTag: bf24a1ba-29ed-4890-8923-abc524fdccd0
+		sourceLineageTag: lifetime_volume
+		summarizeBy: sum
+		sourceColumn: lifetime_volume
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column loan_status
+		dataType: string
+		lineageTag: 24aeaad6-92b2-4805-a3c5-58f3387f0539
+		sourceLineageTag: loan_status
+		summarizeBy: none
+		sourceColumn: loan_status
+
+		annotation SummarizationSetBy = Automatic
+
+	partition gold_customer_360 = entity
+		mode: directLake
+		source
+			entityName: gold_customer_360
+			schemaName: dbo
+			expressionSource: 'DirectLake - banking_lakehouse'
+
